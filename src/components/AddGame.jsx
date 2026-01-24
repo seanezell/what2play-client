@@ -2,53 +2,62 @@ import { useState } from 'react';
 import { apiCall } from '../api';
 import { ENDPOINTS, PLATFORMS } from '../constants';
 
-export default function AddGame() {
+export default function AddGame({ onGameAdded }) {
   const [formData, setFormData] = useState({
     game_name: '',
     platform: 'PC',
     weight: 10,
   });
-  const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const result = await apiCall(ENDPOINTS.ADD_GAME, {
+      await apiCall(ENDPOINTS.ADD_GAME, {
         method: 'POST',
         body: JSON.stringify(formData),
       });
-      setResponse(result);
+      setFormData({ game_name: '', platform: 'PC', weight: 10 });
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+      if (onGameAdded) onGameAdded();
     } catch (error) {
-      setResponse({ error: error.message });
+      console.error('Failed to add game:', error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto bg-slate-800 p-6 rounded-lg">
-      <h2 className="text-2xl font-bold text-white mb-4">Add Game</h2>
+    <div className="bg-slate-800 p-6 rounded-lg">
+      <h2 className="text-xl font-bold text-white mb-4">Add New Game</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {success && (
+        <div className="mb-4 p-3 bg-green-600 text-white rounded">
+          Game added successfully!
+        </div>
+      )}
+      
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
-          <label className="block text-white mb-1">Name</label>
+          <label className="block text-white mb-1 text-sm">Name</label>
           <input
             type="text"
             value={formData.game_name}
             onChange={(e) => setFormData({ ...formData, game_name: e.target.value })}
-            className="w-full p-2 rounded bg-slate-700 text-white"
+            className="w-full p-2 rounded bg-slate-700 text-white text-sm"
             required
           />
         </div>
 
         <div>
-          <label className="block text-white mb-1">Platform</label>
+          <label className="block text-white mb-1 text-sm">Platform</label>
           <select
             value={formData.platform}
             onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-            className="w-full p-2 rounded bg-slate-700 text-white"
+            className="w-full p-2 rounded bg-slate-700 text-white text-sm"
           >
             {PLATFORMS.map(platform => (
               <option key={platform} value={platform}>{platform}</option>
@@ -57,34 +66,27 @@ export default function AddGame() {
         </div>
 
         <div>
-          <label className="block text-white mb-1">Weight (1-10)</label>
+          <label className="block text-white mb-1 text-sm">Weight (1-10)</label>
           <input
             type="number"
             min="1"
             max="10"
             value={formData.weight}
             onChange={(e) => setFormData({ ...formData, weight: parseInt(e.target.value) })}
-            className="w-full p-2 rounded bg-slate-700 text-white"
+            className="w-full p-2 rounded bg-slate-700 text-white text-sm"
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? 'Adding...' : 'Add Game'}
-        </button>
-      </form>
-
-      {response && (
-        <div className="mt-4 p-3 bg-slate-700 rounded">
-          <h3 className="text-white font-bold mb-2">Response:</h3>
-          <pre className="text-green-400 text-sm overflow-auto">
-            {JSON.stringify(response, null, 2)}
-          </pre>
+        <div className="flex items-end">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm"
+          >
+            {loading ? 'Adding...' : 'Add Game'}
+          </button>
         </div>
-      )}
+      </form>
     </div>
   );
 }

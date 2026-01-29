@@ -64,12 +64,23 @@ export default function UserProfile({ profile, onClose, onProfileUpdated }) {
       ...prev,
       [name]: value,
     }));
+
+    // If editing the username, clear previous availability state
+    if (name === 'username') {
+      setUsernameStatus(null);
+      setUsernameMessage('');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate username if it changed
+    if (!formData.username) {
+      alert('Username is required');
+      return;
+    }
+
     if (formData.username !== originalUsername && usernameStatus !== 'available') {
       alert('Please ensure username is available before submitting');
       return;
@@ -99,10 +110,11 @@ export default function UserProfile({ profile, onClose, onProfileUpdated }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username Field */}
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">
+            <label htmlFor="username" className="block text-slate-300 text-sm font-medium mb-2">
               Username
             </label>
             <input
+              id="username"
               type="text"
               name="username"
               value={formData.username}
@@ -123,10 +135,11 @@ export default function UserProfile({ profile, onClose, onProfileUpdated }) {
 
           {/* Real Name Field */}
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">
+            <label htmlFor="real_name" className="block text-slate-300 text-sm font-medium mb-2">
               Real Name
             </label>
             <input
+              id="real_name"
               type="text"
               name="real_name"
               value={formData.real_name}
@@ -138,10 +151,11 @@ export default function UserProfile({ profile, onClose, onProfileUpdated }) {
 
           {/* Preferred Platform Dropdown */}
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">
+            <label htmlFor="preferred_platform" className="block text-slate-300 text-sm font-medium mb-2">
               Preferred Platform
             </label>
             <select
+              id="preferred_platform"
               name="preferred_platform"
               value={formData.preferred_platform}
               onChange={handleInputChange}
@@ -158,20 +172,29 @@ export default function UserProfile({ profile, onClose, onProfileUpdated }) {
 
           {/* Buttons */}
           <div className="flex space-x-3 mt-6">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : 'Save Profile'}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-            >
-              Cancel
-            </button>
+            {(() => {
+              const usernameNotEmpty = (formData.username || '').trim() !== '';
+              const usernameValid = formData.username === originalUsername || usernameStatus === 'available';
+              const canSubmit = usernameNotEmpty && usernameValid && !loading;
+              return (
+                <>
+                  <button
+                    type="submit"
+                    disabled={!canSubmit}
+                    className={`flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 ${canSubmit ? '' : 'opacity-60 cursor-not-allowed'}`}
+                  >
+                    {loading ? 'Saving...' : 'Save Profile'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex-1 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </>
+              );
+            })()}
           </div>
         </form>
       </div>

@@ -36,7 +36,18 @@ function App() {
   const fetchProfile = async () => {
     try {
       const profileData = await apiCall(ENDPOINTS.GET_PROFILE);
-      setProfile(profileData);
+
+      const normalizeProfile = (p) => {
+        if (!p) return null;
+        const src = p.profile || p.user || p.data || p;
+        return {
+          username: src.username || src.user_name || src.userName || src.name || '',
+          real_name: src.real_name || src.realName || src.name || '',
+          preferred_platform: src.preferred_platform || src.preferredPlatform || src.platform || '',
+        };
+      };
+
+      setProfile(normalizeProfile(profileData));
     } catch (error) {
       console.error('Failed to fetch profile:', error);
     }

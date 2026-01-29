@@ -36,25 +36,38 @@ export default function GameSelectionModal({ suggestions, platform, weight, onCl
         <p className="text-slate-300 mb-4">Multiple games found. Please select the correct one:</p>
         
         <div className="space-y-2 mb-6">
-          {suggestions.map((game) => (
-            <label
-              key={game.steam_appid}
-              className={`block p-3 rounded cursor-pointer border-2 transition-colors ${
-                selectedGame?.steam_appid === game.steam_appid
-                  ? 'border-blue-500 bg-slate-700'
-                  : 'border-slate-600 bg-slate-800 hover:bg-slate-700'
-              }`}
-            >
-              <input
-                type="radio"
-                name="game"
-                value={game.steam_appid}
-                onChange={() => setSelectedGame(game)}
-                className="sr-only"
-              />
-              <span className="text-white font-medium">{game.name}</span>
-            </label>
-          ))}
+          {suggestions.map((game) => {
+            const isSelected = selectedGame?.steam_appid === game.steam_appid;
+            return (
+              <label
+                key={game.steam_appid}
+                className={`flex items-center p-3 rounded cursor-pointer border-2 transition-colors ${
+                  isSelected
+                    ? 'border-blue-500 bg-slate-700'
+                    : 'border-slate-600 bg-slate-800 hover:bg-slate-700'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="game"
+                  value={game.steam_appid}
+                  onChange={() => setSelectedGame(game)}
+                  className="sr-only"
+                />
+
+                <div className="flex items-center">
+                  <div
+                    className={`w-5 h-5 rounded-full flex items-center justify-center mr-3 transition-colors ${
+                      isSelected ? 'border-blue-500' : 'border-slate-500'
+                    } border-2 bg-transparent`}
+                    >
+                    {isSelected && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />}
+                  </div>
+                  <span className="text-white font-medium">{game.name}</span>
+                </div>
+              </label>
+            );
+          })}
         </div>
 
         <div className="flex space-x-3">

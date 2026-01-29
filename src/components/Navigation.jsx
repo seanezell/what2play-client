@@ -1,7 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Navigation({ activeTab, setActiveTab, user, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isMenuOpen]);
 
   const tabs = [
     { id: 'games', label: 'Games', icon: '🎮' },
@@ -35,7 +49,7 @@ export default function Navigation({ activeTab, setActiveTab, user, onLogout }) 
           
           <div className="flex items-center space-x-4">
             <span className="text-slate-300">Welcome, {user.name}!</span>
-            <div className="relative">
+            <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="px-3 py-1 bg-slate-700 text-white rounded hover:bg-slate-600 text-sm transition-colors"

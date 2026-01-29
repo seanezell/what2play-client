@@ -7,6 +7,7 @@ export const ENDPOINTS = {
   UPDATE_GAME: '/w2p/user',
   GET_PROFILE: '/w2p/user/profile',
   UPDATE_PROFILE: '/w2p/user/profile',
+  CHECK_USERNAME: '/w2p/usernames/validate',
 };
 
 export const PLATFORMS = [

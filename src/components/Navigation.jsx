@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export default function Navigation({ activeTab, setActiveTab, user, onLogout }) {
+export default function Navigation({ activeTab, setActiveTab, user, onLogout, onProfileClick }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -59,8 +59,17 @@ export default function Navigation({ activeTab, setActiveTab, user, onLogout }) 
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-slate-700 rounded-lg shadow-lg z-50 border border-slate-600">
                   <button
-                    onClick={onLogout}
+                    onClick={() => {
+                      onProfileClick?.();
+                      setIsMenuOpen(false);
+                    }}
                     className="block w-full text-left px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-600 rounded-t-lg transition-colors text-sm"
+                  >
+                    Profile
+                  </button>
+                  <button
+                    onClick={onLogout}
+                    className="block w-full text-left px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-600 rounded-b-lg transition-colors text-sm border-t border-slate-500"
                   >
                     Logout
                   </button>

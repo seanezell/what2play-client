@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import { login, logout, handleCallback, getUser, isAuthenticated } from './auth';
+import { apiCall } from './api';
+import { ENDPOINTS } from './constants';
 import Navigation from './components/Navigation';
 import AddGame from './components/AddGame';
 import GamesList from './components/GamesList';
+import UserProfile from './components/UserProfile';
 import { Friends, Groups } from './components/Placeholders';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [activeTab, setActiveTab] = useState('games');
   const [refreshGames, setRefreshGames] = useState(0);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -17,15 +22,32 @@ function App() {
     if (code) {
       handleCallback(code).then(() => {
         window.history.replaceState({}, document.title, '/');
-        setUser(getUser());
+        const userData = getUser();
+        setUser(userData);
+        fetchProfile();
       });
     } else if (isAuthenticated()) {
-      setUser(getUser());
+      const userData = getUser();
+      setUser(userData);
+      fetchProfile();
     }
   }, []);
 
+  const fetchProfile = async () => {
+    try {
+      const profileData = await apiCall(ENDPOINTS.GET_PROFILE);
+      setProfile(profileData);
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+    }
+  };
+
   const handleGameAdded = () => {
     setRefreshGames(prev => prev + 1);
+  };
+
+  const handleProfileUpdated = (updatedProfile) => {
+    setProfile(updatedProfile);
   };
 
   if (user) {
@@ -36,6 +58,7 @@ function App() {
           setActiveTab={setActiveTab} 
           user={user} 
           onLogout={logout} 
+          onProfileClick={() => setShowProfileModal(true)}
         />
         
         <main className="max-w-6xl mx-auto p-6">
@@ -48,6 +71,14 @@ function App() {
           {activeTab === 'friends' && <Friends />}
           {activeTab === 'groups' && <Groups />}
         </main>
+
+        {showProfileModal && (
+          <UserProfile
+            profile={profile}
+            onClose={() => setShowProfileModal(false)}
+            onProfileUpdated={handleProfileUpdated}
+          />
+        )}
       </div>
     );
   }

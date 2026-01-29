@@ -1,4 +1,8 @@
+import { useState } from 'react';
+
 export default function Navigation({ activeTab, setActiveTab, user, onLogout }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const tabs = [
     { id: 'games', label: 'Games', icon: '🎮' },
     { id: 'friends', label: 'Friends', icon: '👥' },
@@ -31,12 +35,24 @@ export default function Navigation({ activeTab, setActiveTab, user, onLogout }) 
           
           <div className="flex items-center space-x-4">
             <span className="text-slate-300">Welcome, {user.name}!</span>
-            <button
-              onClick={onLogout}
-              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-            >
-              Logout
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="px-3 py-1 bg-slate-700 text-white rounded hover:bg-slate-600 text-sm transition-colors"
+              >
+                ⚙️ Settings
+              </button>
+              {isMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-slate-700 rounded-lg shadow-lg z-50 border border-slate-600">
+                  <button
+                    onClick={onLogout}
+                    className="block w-full text-left px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-600 rounded-t-lg transition-colors text-sm"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

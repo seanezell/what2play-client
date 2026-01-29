@@ -48,6 +48,24 @@ export const getUser = () => {
   };
 };
 
-export const isAuthenticated = () => {
-  return !!localStorage.getItem('idToken');
+export const isTokenExpired = (token) => {
+  if (!token) return true;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (!payload.exp) return true;
+    // exp is in seconds since epoch
+    return Date.now() >= payload.exp * 1000;
+  } catch (e) {
+    console.error('Failed to parse token for expiry check', e);
+    return true;
+  }
 };
+
+export const isAuthenticated = () => {
+  const idToken = localStorage.getItem('idToken');
+  if (!idToken) return false;
+  return !isTokenExpired(idToken);
+};
+
+export const getIdToken = () => localStorage.getItem('idToken');
+export const getAccessToken = () => localStorage.getItem('accessToken');

@@ -1,8 +1,24 @@
 import { API_BASE_URL } from './constants';
+import { isTokenExpired, getIdToken, logout, login } from './auth';
 
 export const apiCall = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('idToken');
-  
+  const token = getIdToken();
+
+  // If token exists but is expired, force re-login
+  if (token && isTokenExpired(token)) {
+    localStorage.removeItem('idToken');
+    localStorage.removeItem('accessToken');
+    // redirect to login flow
+    try {
+      login();
+    } catch (e) {
+      console.error('Error redirecting to login:', e);
+      // fallback to logout which will also clear tokens and redirect
+      logout();
+    }
+    throw new Error('Authentication expired');
+  }
+
   const config = {
     headers: {
       'Content-Type': 'application/json',

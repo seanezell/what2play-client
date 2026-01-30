@@ -67,7 +67,8 @@ function App() {
         <Navigation 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
-          user={user} 
+          user={user}
+          profile={profile}
           onLogout={logout} 
           onProfileClick={() => setShowProfileModal(true)}
         />

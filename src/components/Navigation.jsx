@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export default function Navigation({ activeTab, setActiveTab, user, onLogout, onProfileClick }) {
+export default function Navigation({ activeTab, setActiveTab, user, profile, onLogout, onProfileClick }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -48,7 +48,7 @@ export default function Navigation({ activeTab, setActiveTab, user, onLogout, on
           </div>
           
           <div className="flex items-center space-x-4">
-            <span className="text-slate-300">Welcome, {user.name}!</span>
+            <span className="text-slate-300">Welcome, {profile.username}!</span>
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}

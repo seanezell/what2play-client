@@ -6,7 +6,8 @@ import Navigation from './components/Navigation';
 import AddGame from './components/AddGame';
 import GamesList from './components/GamesList';
 import UserProfile from './components/UserProfile';
-import { Friends, Groups } from './components/Placeholders';
+import FriendsList from './components/FriendsList';
+import { Groups } from './components/Placeholders';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -80,7 +81,7 @@ function App() {
               <GamesList key={refreshGames} />
             </div>
           )}
-          {activeTab === 'friends' && <Friends />}
+          {activeTab === 'friends' && <FriendsList />}
           {activeTab === 'groups' && <Groups />}
         </main>
 

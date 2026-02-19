@@ -57,22 +57,25 @@ export default function FriendsSearch({ onFriendAdded }) {
         <div className="space-y-2">
           <h3 className="text-white font-medium">Search Results</h3>
           <div className="grid gap-2">
-            {searchResults.map((user) => (
-              <div key={user.user_id} className="bg-slate-800 p-3 rounded-lg flex justify-between items-center">
-                <div>
-                  <div className="text-white">{user.username}</div>
-                  {user.real_name && (
-                    <div className="text-sm text-slate-400">{user.real_name}</div>
-                  )}
+            {searchResults.map((user) => {
+              const username = user.username || user.user_id.split('#')[1];
+              return (
+                <div key={user.user_id} className="bg-slate-800 p-3 rounded-lg flex justify-between items-center">
+                  <div>
+                    <div className="text-white">{username}</div>
+                    {user.real_name && (
+                      <div className="text-sm text-slate-400">{user.real_name}</div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleAddFriend(user)}
+                    className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                  >
+                    Add Friend
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleAddFriend(user)}
-                  className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-                >
-                  Add Friend
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

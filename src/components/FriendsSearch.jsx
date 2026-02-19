@@ -61,7 +61,7 @@ export default function FriendsSearch({ onFriendAdded }) {
 
       {searched && searchResults.length === 0 && (
         <div className="text-center py-4 text-slate-400">
-          No users found matching "{searchQuery}"
+          No new users found matching "{searchQuery}"
         </div>
       )}
 

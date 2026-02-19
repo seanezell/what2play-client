@@ -12,7 +12,7 @@ import { Groups } from './components/Placeholders';
 function App() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [activeTab, setActiveTab] = useState('games');
+  const [activeTab, setActiveTab] = useState(localStorage.getItem('activeTab') || 'games');
   const [refreshGames, setRefreshGames] = useState(0);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -54,6 +54,11 @@ function App() {
     }
   };
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    localStorage.setItem('activeTab', tab);
+  };
+
   const handleGameAdded = () => {
     setRefreshGames(prev => prev + 1);
   };
@@ -67,7 +72,7 @@ function App() {
       <div className="min-h-screen bg-slate-900">
         <Navigation 
           activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
+          setActiveTab={handleTabChange} 
           user={user}
           profile={profile}
           onLogout={logout} 

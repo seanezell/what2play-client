@@ -6,6 +6,7 @@ export default function FriendsSearch({ onFriendAdded }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [searched, setSearched] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -13,10 +14,12 @@ export default function FriendsSearch({ onFriendAdded }) {
 
     try {
       setSearching(true);
+      setSearched(true);
       const result = await apiCall(`${ENDPOINTS.SEARCH_FRIENDS}?query=${encodeURIComponent(searchQuery)}`);
       setSearchResults(result.users || []);
     } catch (err) {
       console.error('Search failed:', err);
+      setSearchResults([]);
     } finally {
       setSearching(false);
     }
@@ -52,6 +55,12 @@ export default function FriendsSearch({ onFriendAdded }) {
           {searching ? 'Searching...' : 'Search'}
         </button>
       </form>
+
+      {searched && searchResults.length === 0 && (
+        <div className="text-center py-4 text-slate-400">
+          No users found matching "{searchQuery}"
+        </div>
+      )}
 
       {searchResults.length > 0 && (
         <div className="space-y-2">

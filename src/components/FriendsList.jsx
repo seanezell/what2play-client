@@ -25,7 +25,8 @@ export default function FriendsList() {
   };
 
   const handleRemove = async (friend) => {
-    if (!confirm(`Are you sure you want to remove "${friend.username}"?`)) return;
+    const username = friend.username || friend.user_id.split('#')[1];
+    if (!confirm(`Are you sure you want to remove "${username}"?`)) return;
     
     try {
       await apiCall(`${ENDPOINTS.REMOVE_FRIEND}${friend.user_id}`, {
@@ -56,22 +57,25 @@ export default function FriendsList() {
           </div>
         ) : (
           <div className="grid gap-3">
-            {friends.map((friend) => (
-              <div key={friend.user_id} className="bg-slate-800 p-4 rounded-lg flex justify-between items-center">
-                <div>
-                  <h3 className="text-white font-medium">{friend.username}</h3>
-                  {friend.real_name && (
-                    <div className="text-sm text-slate-400">{friend.real_name}</div>
-                  )}
+            {friends.map((friend) => {
+              const username = friend.username || friend.user_id.split('#')[1];
+              return (
+                <div key={friend.user_id} className="bg-slate-800 p-4 rounded-lg flex justify-between items-center">
+                  <div>
+                    <h3 className="text-white font-medium">{username}</h3>
+                    {friend.real_name && (
+                      <div className="text-sm text-slate-400">{friend.real_name}</div>
+                    )}
+                  </div>
+                  <button 
+                    onClick={() => handleRemove(friend)}
+                    className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                  >
+                    Remove
+                  </button>
                 </div>
-                <button 
-                  onClick={() => handleRemove(friend)}
-                  className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

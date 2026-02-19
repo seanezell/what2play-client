@@ -43,7 +43,10 @@ export default function FriendsSearch({ onFriendAdded }) {
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setSearched(false);
+          }}
           placeholder="Search for friends by username..."
           className="flex-1 px-4 py-2 bg-slate-800 text-white rounded border border-slate-700 focus:outline-none focus:border-blue-500"
         />

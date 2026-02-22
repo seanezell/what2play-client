@@ -7,7 +7,7 @@ import AddGame from './components/AddGame';
 import GamesList from './components/GamesList';
 import UserProfile from './components/UserProfile';
 import FriendsList from './components/FriendsList';
-import { Groups } from './components/Placeholders';
+import GroupsList from './components/GroupsList';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -87,7 +87,7 @@ function App() {
             </div>
           )}
           {activeTab === 'friends' && <FriendsList />}
-          {activeTab === 'groups' && <Groups />}
+          {activeTab === 'groups' && <GroupsList />}
         </main>
 
         {showProfileModal && (

@@ -8,6 +8,7 @@ export default function CreateGroup({ onGroupCreated }) {
   const [selectedFriends, setSelectedFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadFriends();
@@ -38,6 +39,7 @@ export default function CreateGroup({ onGroupCreated }) {
 
     try {
       setCreating(true);
+      setError(null);
       await apiCall(ENDPOINTS.CREATE_GROUP, {
         method: 'POST',
         body: JSON.stringify({
@@ -50,6 +52,7 @@ export default function CreateGroup({ onGroupCreated }) {
       onGroupCreated();
     } catch (err) {
       console.error('Failed to create group:', err);
+      setError(err.message || 'Failed to create group');
     } finally {
       setCreating(false);
     }
@@ -59,6 +62,12 @@ export default function CreateGroup({ onGroupCreated }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-2 rounded">
+          {error}
+        </div>
+      )}
+      
       <div>
         <input
           type="text"

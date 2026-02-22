@@ -31,7 +31,9 @@ export const apiCall = async (endpoint, options = {}) => {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
   
   if (!response.ok) {
-    throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+    const errorData = await response.json().catch(() => null);
+    const errorMessage = errorData?.error || `API call failed: ${response.status} ${response.statusText}`;
+    throw new Error(errorMessage);
   }
   
   return response.json();

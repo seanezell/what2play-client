@@ -12,6 +12,10 @@ export const ENDPOINTS = {
   SEARCH_FRIENDS: '/w2p/friends/search',
   ADD_FRIEND: '/w2p/friends/',
   REMOVE_FRIEND: '/w2p/friends/',
+  LIST_GROUPS: '/w2p/groups/list',
+  CREATE_GROUP: '/w2p/groups/create',
+  DELETE_GROUP: '/w2p/groups/',
+  GET_GROUP: '/w2p/groups/',
 };
 
 export const PLATFORMS = [

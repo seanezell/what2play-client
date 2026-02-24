@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { login, logout, handleCallback, getUser, isAuthenticated } from './auth';
 import { apiCall } from './api';
 import { ENDPOINTS } from './constants';
+import Dashboard from './components/Dashboard';
 import Navigation from './components/Navigation';
 import AddGame from './components/AddGame';
 import GamesList from './components/GamesList';
@@ -12,7 +13,7 @@ import GroupsList from './components/GroupsList';
 function App() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [activeTab, setActiveTab] = useState(localStorage.getItem('activeTab') || 'games');
+  const [activeTab, setActiveTab] = useState(localStorage.getItem('activeTab') || 'dashboard');
   const [refreshGames, setRefreshGames] = useState(0);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -80,6 +81,7 @@ function App() {
         />
         
         <main className="max-w-6xl mx-auto p-6">
+          {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'games' && (
             <div className="space-y-6">
               <AddGame onGameAdded={handleGameAdded} />

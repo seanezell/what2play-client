@@ -16,7 +16,7 @@ export const ENDPOINTS = {
   CREATE_GROUP: '/w2p/groups/create',
   DELETE_GROUP: '/w2p/groups/',
   GET_GROUP: '/w2p/groups/',
-  PICK_GAME: '/w2p/groups/pick/',
+  PICK_GAME: '/w2p/groups/pick',
 };
 
 export const PLATFORMS = [

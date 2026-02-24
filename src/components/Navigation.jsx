@@ -18,6 +18,7 @@ export default function Navigation({ activeTab, setActiveTab, user, profile, onL
   }, [isMenuOpen]);
 
   const tabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
     { id: 'games', label: 'Games', icon: '🎮' },
     { id: 'friends', label: 'Friends', icon: '👥' },
     { id: 'groups', label: 'Groups', icon: '🎯' },

@@ -8,6 +8,7 @@ export default function AddGame({ onGameAdded }) {
     game_name: '',
     platform: 'PC',
     weight: 10,
+    visibility: 'friends',
   });
   const [loading, setLoading] = useState(false);
   const [showSelection, setShowSelection] = useState(false);
@@ -27,7 +28,7 @@ export default function AddGame({ onGameAdded }) {
         setShowSelection(true);
       } else {
         // Game added successfully
-        setFormData({ game_name: '', platform: 'PC', weight: 10 });
+        setFormData({ game_name: '', platform: 'PC', weight: 10, visibility: 'friends' });
         if (onGameAdded) onGameAdded();
       }
     } catch (error) {
@@ -38,7 +39,7 @@ export default function AddGame({ onGameAdded }) {
   };
 
   const handleGameAdded = () => {
-    setFormData({ game_name: '', platform: 'PC', weight: 10 });
+    setFormData({ game_name: '', platform: 'PC', weight: 10, visibility: 'friends' });
     if (onGameAdded) onGameAdded();
   };
 
@@ -52,7 +53,7 @@ export default function AddGame({ onGameAdded }) {
       <div className="bg-slate-800 p-6 rounded-lg">
         <h2 className="text-xl font-bold text-white mb-4">Add New Game</h2>
         
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="block text-white mb-1 text-sm">Name</label>
             <input
@@ -87,6 +88,19 @@ export default function AddGame({ onGameAdded }) {
               onChange={(e) => setFormData({ ...formData, weight: parseInt(e.target.value) })}
               className="w-full p-2 rounded bg-slate-700 text-white text-sm"
             />
+          </div>
+
+          <div>
+            <label className="block text-white mb-1 text-sm">Visibility</label>
+            <select
+              value={formData.visibility}
+              onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
+              className="w-full p-2 rounded bg-slate-700 text-white text-sm"
+            >
+              <option value="public">Public</option>
+              <option value="friends">Friends</option>
+              <option value="private">Private</option>
+            </select>
           </div>
 
           <div className="flex items-end">

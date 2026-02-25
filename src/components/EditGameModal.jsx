@@ -6,6 +6,7 @@ export default function EditGameModal({ game, onClose, onSave }) {
   const [formData, setFormData] = useState({
     platform: game.platform,
     weight: game.weight,
+    visibility: game.visibility || 'friends',
   });
   const [loading, setLoading] = useState(false);
 
@@ -59,6 +60,19 @@ export default function EditGameModal({ game, onClose, onSave }) {
               onChange={(e) => setFormData({ ...formData, weight: parseInt(e.target.value) })}
               className="w-full p-2 rounded bg-slate-700 text-white"
             />
+          </div>
+
+          <div>
+            <label className="block text-white mb-1">Visibility</label>
+            <select
+              value={formData.visibility}
+              onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
+              className="w-full p-2 rounded bg-slate-700 text-white"
+            >
+              <option value="public">Public</option>
+              <option value="friends">Friends</option>
+              <option value="private">Private</option>
+            </select>
           </div>
 
           <div className="flex space-x-3 pt-4">

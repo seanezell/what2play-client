@@ -44,8 +44,14 @@ export default function GamesList() {
     return friendGame?.weight;
   };
 
+  const weightToColor = (weight) => {
+    if (weight <= 3) return 'bg-red-500';
+    if (weight <= 7) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
   const renderWeightBar = (myWeight, friendWeight = null) => {
-    const myColor = myWeight <= 3 ? 'bg-red-500' : myWeight <= 7 ? 'bg-yellow-500' : 'bg-green-500';
+    const myColor = weightToColor(myWeight);
     
     if (friendWeight === null) {
       return (
@@ -58,7 +64,7 @@ export default function GamesList() {
       );
     }
 
-    const friendColor = friendWeight <= 3 ? 'bg-red-400' : friendWeight <= 7 ? 'bg-yellow-400' : 'bg-green-400';
+    const friendColor = weightToColor(friendWeight);
     return (
       <div className="flex items-center gap-1">
         <div className="flex h-4 w-24 bg-slate-700 rounded overflow-hidden">
@@ -98,6 +104,7 @@ export default function GamesList() {
   const loadFriends = async () => {
     try {
       const result = await apiCall(ENDPOINTS.LIST_FRIENDS);
+      console.log(`Loaded friend data: ${JSON.stringify(result)}`);
       setFriends(result.friends || []);
     } catch (err) {
       console.error('Failed to load friends:', err);
@@ -106,7 +113,9 @@ export default function GamesList() {
 
   const loadFriendGames = async (friendId) => {
     try {
+      console.log(`Loading games for friend ID: ${friendId}`);
       const result = await apiCall(`${ENDPOINTS.LIST_FRIENDS_GAMES}?user_id=${friendId}`);
+      console.log(`Loaded friend games: ${JSON.stringify(result)}`);
       setFriendGames(result.games || []);
     } catch (err) {
       console.error('Failed to load friend games:', err);
@@ -143,9 +152,12 @@ export default function GamesList() {
     <div className="space-y-4">
       {friends.length > 0 && (
         <div className="bg-slate-800 p-4 rounded-lg">
-          <label className="block text-white mb-2 text-sm font-medium">Compare with Friend</label>
+          <label htmlFor="ddFriendComparison" className="block text-white mb-2 text-sm font-medium">
+            Compare with Friend
+          </label>
           <div className="flex items-center gap-4">
             <select
+              id='ddFriendComparison'
               value={selectedFriend}
               onChange={(e) => setSelectedFriend(e.target.value)}
               className="flex-1 px-4 py-2 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:border-blue-500"

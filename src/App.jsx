@@ -49,7 +49,13 @@ function App() {
         };
       };
 
-      setProfile(normalizeProfile(profileData));
+      const normalized = normalizeProfile(profileData);
+      setProfile(normalized);
+      
+      // Force profile setup if username is missing
+      if (!normalized?.username) {
+        setShowProfileModal(true);
+      }
     } catch (error) {
       console.error('Failed to fetch profile:', error);
     }
@@ -95,8 +101,14 @@ function App() {
         {showProfileModal && (
           <UserProfile
             profile={profile}
-            onClose={() => setShowProfileModal(false)}
+            onClose={() => {
+              // Only allow closing if username is set
+              if (profile?.username) {
+                setShowProfileModal(false);
+              }
+            }}
             onProfileUpdated={handleProfileUpdated}
+            required={!profile?.username}
           />
         )}
       </div>

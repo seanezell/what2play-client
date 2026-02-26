@@ -9,6 +9,22 @@ export default function GamesList() {
   const [error, setError] = useState(null);
   const [editingGame, setEditingGame] = useState(null);
 
+  const platformIcons = {
+    'PC': '🖥️',
+  };
+
+  const visibilityIcons = {
+    'public': '🌐',
+    'friends': '👥',
+    'private': '🔒',
+  };
+
+  const getWeightColor = (weight) => {
+    if (weight <= 3) return 'bg-red-600';
+    if (weight <= 7) return 'bg-yellow-600';
+    return 'bg-green-600';
+  };
+
   useEffect(() => {
     loadGames();
   }, []);
@@ -59,31 +75,41 @@ export default function GamesList() {
         </div>
       ) : (
         <div className="grid gap-3">
-          {games.map((game) => (
-            <div key={game.game_id} className="bg-slate-800 p-4 rounded-lg flex justify-between items-center">
-              <div>
-                <h3 className="text-white font-medium">{game.name}</h3>
-                <div className="flex items-center space-x-4 text-sm text-slate-400">
-                  <span>{game.platform}</span>
-                  <span>Weight: {game.weight}/10</span>
+          {games.map((game) => {
+            const visibility = game.visibility || 'friends';
+            return (
+              <div key={game.game_id} className="bg-slate-800 p-4 rounded-lg flex justify-between items-center">
+                <div>
+                  <h3 className="text-white font-medium">{game.name}</h3>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="px-2 py-1 bg-slate-700 text-white text-xs rounded flex items-center gap-1">
+                      {platformIcons[game.platform] || '🎮'} {game.platform}
+                    </span>
+                    <span className={`px-2 py-1 ${getWeightColor(game.weight)} text-white text-xs rounded`}>
+                      Weight: {game.weight}/10
+                    </span>
+                    <span className="px-2 py-1 bg-slate-700 text-white text-xs rounded flex items-center gap-1">
+                      {visibilityIcons[visibility]} {visibility.charAt(0).toUpperCase() + visibility.slice(1)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={() => setEditingGame(game)}
+                    className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(game)}
+                    className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-              <div className="flex space-x-2">
-                <button 
-                  onClick={() => setEditingGame(game)}
-                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                >
-                  Edit
-                </button>
-                <button 
-                  onClick={() => handleDelete(game)}
-                  className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
       

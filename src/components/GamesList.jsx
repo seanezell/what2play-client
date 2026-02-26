@@ -28,15 +28,27 @@ export default function GamesList() {
   };
 
   const getSortedGames = () => {
-    if (!selectedFriend) return games;
+    if (!selectedFriend) return games.map(g => ({ ...g, isMine: true }));
+    
     const commonGames = getCommonGames();
-    return [...games].sort((a, b) => {
-      const aCommon = commonGames.has(a.game_id.toLowerCase());
-      const bCommon = commonGames.has(b.game_id.toLowerCase());
-      if (aCommon && !bCommon) return -1;
-      if (!aCommon && bCommon) return 1;
-      return 0;
-    });
+    const myGameIds = new Set(games.map(g => g.game_id.toLowerCase()));
+    
+    // Common games
+    const commonMyGames = games
+      .filter(g => commonGames.has(g.game_id.toLowerCase()))
+      .map(g => ({ ...g, isMine: true }));
+    
+    // Friend-only games (not in my list)
+    const friendOnlyGames = friendGames
+      .filter(g => !myGameIds.has(g.game_id.toLowerCase()))
+      .map(g => ({ ...g, isMine: false, name: g.game_id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') }));
+    
+    // My non-common games
+    const myOnlyGames = games
+      .filter(g => !commonGames.has(g.game_id.toLowerCase()))
+      .map(g => ({ ...g, isMine: true }));
+    
+    return [...commonMyGames, ...friendOnlyGames, ...myOnlyGames];
   };
 
   const getFriendGameWeight = (gameId) => {
@@ -50,7 +62,19 @@ export default function GamesList() {
     return 'bg-green-500';
   };
 
-  const renderWeightBar = (myWeight, friendWeight = null) => {
+  const renderWeightBar = (myWeight, friendWeight = null, isFriendOnly = false) => {
+    if (isFriendOnly) {
+      const friendColor = weightToColor(friendWeight);
+      return (
+        <div className="flex items-center gap-1">
+          <div className="flex h-4 w-24 bg-slate-700 rounded overflow-hidden">
+            <div className={`${friendColor} transition-all`} style={{ width: `${friendWeight * 10}%` }}></div>
+          </div>
+          <span className="text-xs text-slate-400">{friendWeight}</span>
+        </div>
+      );
+    }
+    
     const myColor = weightToColor(myWeight);
     
     if (friendWeight === null) {
@@ -193,44 +217,56 @@ export default function GamesList() {
       ) : (
         <div className="grid gap-3">
           {sortedGames.map((game) => {
+            const isFriendOnly = !game.isMine;
             const visibility = game.visibility || 'friends';
-            const isCommon = commonGames.has(game.game_id.toLowerCase());
-            const friendWeight = getFriendGameWeight(game.game_id);
-            const isGrayedOut = selectedFriend && !isCommon;
+            const isCommon = !isFriendOnly && commonGames.has(game.game_id.toLowerCase());
+            const friendWeight = !isFriendOnly ? getFriendGameWeight(game.game_id) : null;
+            const isGrayedOut = selectedFriend && !isCommon && !isFriendOnly;
             
             return (
               <div 
                 key={game.game_id} 
-                className={`bg-slate-800 p-4 rounded-lg flex justify-between items-center transition-opacity ${
+                className={`p-4 rounded-lg flex justify-between items-center transition-opacity ${
+                  isFriendOnly ? 'bg-blue-900/20 border border-blue-700/50' : 'bg-slate-800'
+                } ${
                   isGrayedOut ? 'opacity-40' : 'opacity-100'
                 }`}
               >
                 <div className="flex-1">
-                  <h3 className="text-white font-medium">{game.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-white font-medium">{game.name}</h3>
+                    {isFriendOnly && (
+                      <span className="px-2 py-0.5 bg-blue-600 text-white text-xs rounded">Friend's Game</span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="px-2 py-1 bg-slate-700 text-white text-xs rounded flex items-center gap-1">
                       {platformIcons[game.platform] || '🎮'} {game.platform}
                     </span>
-                    <span className="px-2 py-1 bg-slate-700 text-white text-xs rounded flex items-center gap-1">
-                      {visibilityIcons[visibility]} {visibility.charAt(0).toUpperCase() + visibility.slice(1)}
-                    </span>
-                    {renderWeightBar(game.weight, friendWeight)}
+                    {!isFriendOnly && (
+                      <span className="px-2 py-1 bg-slate-700 text-white text-xs rounded flex items-center gap-1">
+                        {visibilityIcons[visibility]} {visibility.charAt(0).toUpperCase() + visibility.slice(1)}
+                      </span>
+                    )}
+                    {isFriendOnly ? renderWeightBar(null, game.weight, true) : renderWeightBar(game.weight, friendWeight)}
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <button 
-                    onClick={() => setEditingGame(game)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(game)}
-                    className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </div>
+                {!isFriendOnly && (
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => setEditingGame(game)}
+                      className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(game)}
+                      className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}

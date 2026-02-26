@@ -108,7 +108,7 @@ function App() {
               }
             }}
             onProfileUpdated={handleProfileUpdated}
-            required={normalized?.username.startsWith('user_')}
+            required={profile?.username.startsWith('user_')}
           />
         )}
       </div>

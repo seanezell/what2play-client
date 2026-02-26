@@ -10,6 +10,7 @@ export const ENDPOINTS = {
   CHECK_USERNAME: '/w2p/usernames/validate',
   LIST_FRIENDS: '/w2p/friends/list',
   SEARCH_FRIENDS: '/w2p/friends/search',
+  LIST_FRIENDS_GAMES: '/w2p/friends/games',
   ADD_FRIEND: '/w2p/friends/',
   REMOVE_FRIEND: '/w2p/friends/',
   LIST_GROUPS: '/w2p/groups/list',

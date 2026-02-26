@@ -106,7 +106,7 @@ export default function GamesList() {
 
   const loadFriendGames = async (friendId) => {
     try {
-      const result = await apiCall(`${ENDPOINTS.LIST_FRIENDS}/games?user_id=${friendId}`);
+      const result = await apiCall(`${ENDPOINTS.LIST_FRIENDS_GAMES}?user_id=${friendId}`);
       setFriendGames(result.games || []);
     } catch (err) {
       console.error('Failed to load friend games:', err);
@@ -199,10 +199,10 @@ export default function GamesList() {
                     <span className="px-2 py-1 bg-slate-700 text-white text-xs rounded flex items-center gap-1">
                       {platformIcons[game.platform] || '🎮'} {game.platform}
                     </span>
-                    {renderWeightBar(game.weight, friendWeight)}
                     <span className="px-2 py-1 bg-slate-700 text-white text-xs rounded flex items-center gap-1">
                       {visibilityIcons[visibility]} {visibility.charAt(0).toUpperCase() + visibility.slice(1)}
                     </span>
+                    {renderWeightBar(game.weight, friendWeight)}
                   </div>
                 </div>
                 <div className="flex space-x-2">

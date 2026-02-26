@@ -25,11 +25,23 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
     }
   }, [profile]);
 
+  // Check if username matches the default pattern from Lambda
+  const isDefaultUsername = (username) => {
+    return username.startsWith('user_');
+  };
+
   // Check username availability on blur
   const checkUsername = async (username) => {
     if (!username || username === originalUsername) {
       setUsernameStatus(null);
       setUsernameMessage('');
+      return;
+    }
+
+    // Check for default username pattern
+    if (isDefaultUsername(username)) {
+      setUsernameStatus('unavailable');
+      setUsernameMessage('Please choose a real username');
       return;
     }
 
@@ -78,6 +90,12 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
     // Validate username if it changed
     if (!formData.username) {
       alert('Username is required');
+      return;
+    }
+
+    // Reject default username pattern
+    if (isDefaultUsername(formData.username)) {
+      alert('Please choose a real username instead of using the default format');
       return;
     }
 
@@ -180,8 +198,9 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
           <div className="flex space-x-3 mt-6">
             {(() => {
               const usernameNotEmpty = (formData.username || '').trim() !== '';
+              const usernameNotDefault = !isDefaultUsername(formData.username);
               const usernameValid = formData.username === originalUsername || usernameStatus === 'available';
-              const canSubmit = usernameNotEmpty && usernameValid && !loading;
+              const canSubmit = usernameNotEmpty && usernameNotDefault && usernameValid && !loading;
               return (
                 <>
                   <button

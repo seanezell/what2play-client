@@ -53,7 +53,7 @@ function App() {
       setProfile(normalized);
       
       // Force profile setup if username is missing
-      if (!normalized?.username) {
+      if (normalized?.username.startsWith('user_')) {
         setShowProfileModal(true);
       }
     } catch (error) {

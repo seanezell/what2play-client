@@ -24,7 +24,8 @@ export default function GamesList() {
 
   const getCommonGames = () => {
     if (!selectedFriend || friendGames.length === 0) return new Set();
-    return new Set(friendGames.map(g => g.game_id.toLowerCase()));
+    const myGameIds = new Set(games.map(g => g.game_id.toLowerCase()));
+    return new Set(friendGames.filter(g => myGameIds.has(g.game_id.toLowerCase())).map(g => g.game_id.toLowerCase()));
   };
 
   const getSortedGames = () => {
@@ -171,6 +172,9 @@ export default function GamesList() {
   const commonGames = getCommonGames();
   const sortedGames = getSortedGames();
   const commonCount = selectedFriend ? Array.from(commonGames).length : 0;
+  const selectedFriendName = selectedFriend 
+    ? (friends.find(f => f.user_id === selectedFriend)?.username || friends.find(f => f.user_id === selectedFriend)?.user_id.split('#')[1] || 'Friend')
+    : '';
 
   return (
     <div className="space-y-4">
@@ -197,9 +201,18 @@ export default function GamesList() {
               })}
             </select>
             {selectedFriend && (
-              <span className="text-slate-400 text-sm whitespace-nowrap">
-                {commonCount} in common
-              </span>
+              <>
+                <span className="text-slate-400 text-sm whitespace-nowrap">
+                  {commonCount} in common
+                </span>
+                <button
+                  onClick={() => setSelectedFriend('')}
+                  className="px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 whitespace-nowrap"
+                  title="Clear comparison"
+                >
+                  ✕ Clear
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -236,7 +249,7 @@ export default function GamesList() {
                   <div className="flex items-center gap-2">
                     <h3 className="text-white font-medium">{game.name}</h3>
                     {isFriendOnly && (
-                      <span className="px-2 py-0.5 bg-blue-600 text-white text-xs rounded">Friend's Game</span>
+                      <span className="px-2 py-0.5 bg-blue-600 text-white text-xs rounded">{selectedFriendName}'s Game</span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-2">

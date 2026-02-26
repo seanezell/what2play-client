@@ -24,23 +24,23 @@ export default function GamesList() {
 
   const getCommonGames = () => {
     if (!selectedFriend || friendGames.length === 0) return new Set();
-    return new Set(friendGames.map(g => g.name.toLowerCase()));
+    return new Set(friendGames.map(g => g.game_id.toLowerCase()));
   };
 
   const getSortedGames = () => {
     if (!selectedFriend) return games;
     const commonGames = getCommonGames();
     return [...games].sort((a, b) => {
-      const aCommon = commonGames.has(a.name.toLowerCase());
-      const bCommon = commonGames.has(b.name.toLowerCase());
+      const aCommon = commonGames.has(a.game_id.toLowerCase());
+      const bCommon = commonGames.has(b.game_id.toLowerCase());
       if (aCommon && !bCommon) return -1;
       if (!aCommon && bCommon) return 1;
       return 0;
     });
   };
 
-  const getFriendGameWeight = (gameName) => {
-    const friendGame = friendGames.find(g => g.name.toLowerCase() === gameName.toLowerCase());
+  const getFriendGameWeight = (gameId) => {
+    const friendGame = friendGames.find(g => g.game_id.toLowerCase() === gameId.toLowerCase());
     return friendGame?.weight;
   };
 
@@ -194,8 +194,8 @@ export default function GamesList() {
         <div className="grid gap-3">
           {sortedGames.map((game) => {
             const visibility = game.visibility || 'friends';
-            const isCommon = commonGames.has(game.name.toLowerCase());
-            const friendWeight = getFriendGameWeight(game.name);
+            const isCommon = commonGames.has(game.game_id.toLowerCase());
+            const friendWeight = getFriendGameWeight(game.game_id);
             const isGrayedOut = selectedFriend && !isCommon;
             
             return (

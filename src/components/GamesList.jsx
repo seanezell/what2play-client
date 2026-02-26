@@ -118,6 +118,7 @@ export default function GamesList() {
     try {
       setLoading(true);
       const result = await apiCall(ENDPOINTS.LIST_GAMES);
+      console.log('Loaded my games:', JSON.stringify(result));
       setGames(result.games || []);
     } catch (err) {
       setError(err.message);

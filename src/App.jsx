@@ -9,6 +9,7 @@ import GamesList from './components/GamesList';
 import UserProfile from './components/UserProfile';
 import FriendsList from './components/FriendsList';
 import GroupsList from './components/GroupsList';
+import LandingPage from './components/LandingPage';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -116,18 +117,10 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold text-white mb-4">What 2 Play</h1>
-        <p className="text-xl text-slate-400 mb-4">Coming Soon</p>
-        <button
-          onClick={login}
-          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Login
-        </button>
-      </div>
-    </div>
+    <LandingPage 
+      onLogin={login}
+      onSignup={login}
+    />
   );
 }
 

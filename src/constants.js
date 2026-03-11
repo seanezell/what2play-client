@@ -18,7 +18,8 @@ export const ENDPOINTS = {
   DELETE_GROUP: '/w2p/groups/',
   GET_GROUP: '/w2p/groups/',
   PICK_GAME: '/w2p/groups/pick',
-  TOP_LISTS: '/w2p/lists/games'
+  TOP_LISTS: '/w2p/lists/games',
+  UPLOAD_AVATAR: '/w2p/user/avatar',
 };
 
 export const PLATFORMS = [

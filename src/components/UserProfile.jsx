@@ -7,8 +7,10 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
     username: '',
     real_name: '',
     preferred_platform: '',
+    avatar_url: '',
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState(null); // 'checking', 'available', 'unavailable'
   const [usernameMessage, setUsernameMessage] = useState('');
   const [originalUsername, setOriginalUsername] = useState('');
@@ -20,6 +22,7 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
         username: profile.username || '',
         real_name: profile.real_name || '',
         preferred_platform: profile.preferred_platform || '',
+        avatar_url: profile.avatar_url || '',
       });
       setOriginalUsername(profile.username || '');
     }
@@ -84,6 +87,49 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
     }
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== 'image/png') {
+      alert('Only PNG files are allowed');
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      setUploading(true);
+      
+      // Get presigned URL
+      const response = await apiCall(ENDPOINTS.UPLOAD_AVATAR, {
+        method: 'POST',
+        body: JSON.stringify({ filename: file.name }),
+      });
+
+      // Upload to S3
+      await fetch(response.upload_url, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': 'image/png',
+        },
+      });
+
+      // Update form data with avatar URL
+      setFormData(prev => ({
+        ...prev,
+        avatar_url: response.avatar_url,
+      }));
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+      alert('Failed to upload avatar');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -131,6 +177,35 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Avatar Upload */}
+          <div>
+            <label className="block text-slate-300 text-sm font-medium mb-2">
+              Avatar
+            </label>
+            <div className="flex items-center gap-4">
+              {formData.avatar_url && (
+                <img
+                  src={formData.avatar_url}
+                  alt="Avatar"
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept=".png,image/png"
+                  onChange={handleAvatarUpload}
+                  disabled={uploading}
+                  className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer disabled:opacity-50"
+                />
+                <p className="text-xs text-slate-500 mt-1">PNG only, max 5MB</p>
+              </div>
+            </div>
+            {uploading && (
+              <div className="text-sm text-blue-400 mt-2">Uploading...</div>
+            )}
+          </div>
+
           {/* Username Field */}
           <div>
             <label htmlFor="username" className="block text-slate-300 text-sm font-medium mb-2">

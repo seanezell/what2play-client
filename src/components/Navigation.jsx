@@ -49,6 +49,13 @@ export default function Navigation({ activeTab, setActiveTab, user, profile, onL
           </div>
           
           <div className="flex items-center space-x-4">
+            {profile?.avatar_url && (
+              <img
+                src={profile.avatar_url}
+                alt="Avatar"
+                className="w-10 h-10 rounded-full object-cover border-2 border-slate-600"
+              />
+            )}
             <span className="text-slate-300">Welcome, {(profile) ? profile.username : user.name}!</span>
             <div className="relative" ref={menuRef}>
               <button

@@ -104,11 +104,13 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
       // Get presigned URL
       const response = await apiCall(ENDPOINTS.UPLOAD_AVATAR, {
         method: 'POST',
-        body: JSON.stringify({ filename: file.name }),
+        body: JSON.stringify({ filename: 'avatar.png' }),
       });
 
-      // Upload to S3
-      await fetch(response.upload_url, {
+      const { upload_url, avatar_url } = response;
+
+      // Upload to S3 using PUT
+      await fetch(upload_url, {
         method: 'PUT',
         body: file,
         headers: {
@@ -119,7 +121,7 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
       // Update form data with avatar URL
       setFormData(prev => ({
         ...prev,
-        avatar_url: response.avatar_url,
+        avatar_url: avatar_url,
       }));
     } catch (error) {
       console.error('Failed to upload avatar:', error);

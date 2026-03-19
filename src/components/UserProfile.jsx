@@ -118,7 +118,7 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
       // Step 3: Save avatar_url to profile immediately
       await apiCall(ENDPOINTS.UPDATE_PROFILE, {
         method: 'PUT',
-        body: JSON.stringify({ avatar_url }),
+        body: JSON.stringify({ username: formData.username, avatar_url }),
       });
 
       setFormData(prev => ({ ...prev, avatar_url }));

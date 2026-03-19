@@ -69,3 +69,12 @@ export const isAuthenticated = () => {
 
 export const getIdToken = () => localStorage.getItem('idToken');
 export const getAccessToken = () => localStorage.getItem('accessToken');
+
+export const getCurrentUserId = () => {
+  const idToken = localStorage.getItem('idToken');
+  if (!idToken) return null;
+  try {
+    const payload = JSON.parse(atob(idToken.split('.')[1]));
+    return payload.sub || null;
+  } catch { return null; }
+};

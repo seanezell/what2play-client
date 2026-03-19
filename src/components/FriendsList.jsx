@@ -61,11 +61,24 @@ export default function FriendsList() {
               const username = friend.username || friend.user_id.split('#')[1];
               return (
                 <div key={friend.user_id} className="bg-slate-800 p-4 rounded-lg flex justify-between items-center">
-                  <div>
-                    <h3 className="text-white font-medium">{username}</h3>
-                    {friend.real_name && (
-                      <div className="text-sm text-slate-400">{friend.real_name}</div>
+                  <div className="flex items-center gap-3">
+                    {friend.avatar_url ? (
+                      <img
+                        src={friend.avatar_url}
+                        alt={username}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-slate-600"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-white text-sm font-bold">
+                        {username.charAt(0).toUpperCase()}
+                      </div>
                     )}
+                    <div>
+                      <h3 className="text-white font-medium">{username}</h3>
+                      {friend.real_name && (
+                        <div className="text-sm text-slate-400">{friend.real_name}</div>
+                      )}
+                    </div>
                   </div>
                   <button 
                     onClick={() => handleRemove(friend)}

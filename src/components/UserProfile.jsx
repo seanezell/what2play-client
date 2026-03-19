@@ -103,6 +103,7 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
       // Step 1: Get presigned URL (no body required)
       const { upload_url, avatar_url } = await apiCall(ENDPOINTS.UPLOAD_AVATAR, {
         method: 'POST',
+        headers: { 'Content-Type': '' },
       });
 
       // Step 2: Upload directly to S3

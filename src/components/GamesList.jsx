@@ -286,7 +286,7 @@ export default function GamesList({ profile }) {
             return (
               <div 
                 key={game.game_id} 
-                className={`p-4 rounded-lg flex justify-between items-center transition-opacity ${
+                className={`p-4 rounded-lg flex justify-between items-start transition-opacity ${
                   isFriendOnly ? 'bg-blue-900/20 border border-blue-700/50' : 'bg-slate-800'
                 } ${
                   isGrayedOut ? 'opacity-40' : 'opacity-100'

@@ -93,7 +93,7 @@ function App() {
           {activeTab === 'games' && (
             <div className="space-y-6">
               <AddGame onGameAdded={handleGameAdded} />
-              <GamesList key={refreshGames} />
+              <GamesList key={refreshGames} profile={profile} />
             </div>
           )}
           {activeTab === 'friends' && <FriendsList />}

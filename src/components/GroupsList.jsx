@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { apiCall } from '../api';
 import { ENDPOINTS } from '../constants';
+import { getCurrentUserId } from '../auth';
 import CreateGroup from './CreateGroup';
+import GroupDetail from './GroupDetail';
 
 export default function GroupsList() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const currentUserId = getCurrentUserId();
 
   useEffect(() => {
     loadGroups();
@@ -24,19 +28,6 @@ export default function GroupsList() {
     }
   };
 
-  const handleDelete = async (group) => {
-    const groupName = group.group_name || 'this group';
-    if (!confirm(`Are you sure you want to delete "${groupName}"?`)) return;
-    
-    try {
-      await apiCall(`${ENDPOINTS.DELETE_GROUP}${group.group_id}`, {
-        method: 'DELETE',
-      });
-      loadGroups();
-    } catch (err) {
-      console.error('Failed to delete group:', err);
-    }
-  };
 
   if (loading) return <div className="text-white">Loading groups...</div>;
   if (error) return <div className="text-red-400">Error: {error}</div>;
@@ -61,7 +52,11 @@ export default function GroupsList() {
         ) : (
           <div className="grid gap-3">
             {groups.map((group) => (
-              <div key={group.group_id} className="bg-slate-800 p-4 rounded-lg flex justify-between items-center">
+              <div
+                key={group.group_id}
+                onClick={() => setSelectedGroup(group)}
+                className="bg-slate-800 p-4 rounded-lg flex justify-between items-center cursor-pointer hover:bg-slate-700 transition-colors"
+              >
                 <div>
                   <h3 className="text-white font-medium">{group.group_name || 'Unnamed Group'}</h3>
                   <div className="text-sm text-slate-400">
@@ -69,17 +64,22 @@ export default function GroupsList() {
                     {group.last_pick && ` • Last pick: ${group.last_pick.game_name || 'Unknown'}`}
                   </div>
                 </div>
-                <button 
-                  onClick={() => handleDelete(group)}
-                  className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                >
-                  Delete
-                </button>
+                <span className="text-slate-400 text-sm">View →</span>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {selectedGroup && (
+        <GroupDetail
+          group={selectedGroup}
+          currentUserId={currentUserId}
+          onClose={() => setSelectedGroup(null)}
+          onGroupUpdated={() => { loadGroups(); }}
+          onGroupDeleted={() => { setSelectedGroup(null); loadGroups(); }}
+        />
+      )}
     </div>
   );
 }

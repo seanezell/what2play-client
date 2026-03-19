@@ -3,7 +3,7 @@ import { apiCall } from '../api';
 import { ENDPOINTS } from '../constants';
 import EditGameModal from './EditGameModal';
 
-export default function GamesList() {
+export default function GamesList({ profile }) {
   const [games, setGames] = useState([]);
   const [friends, setFriends] = useState([]);
   const [selectedFriend, setSelectedFriend] = useState('');
@@ -78,79 +78,68 @@ export default function GamesList() {
       );
     }
 
-    // Pin comparison bar
     const selectedFriendData = friends.find(f => f.user_id === selectedFriend);
     const friendAvatar = selectedFriendData?.avatar_url;
     const friendInitial = selectedFriendName.charAt(0).toUpperCase();
+    const sameWeight = myWeight === friendWeight;
 
     const myLeftPct = ((myWeight - 1) / 9) * 100;
     const friendLeftPct = ((friendWeight - 1) / 9) * 100;
-    const sameWeight = myWeight === friendWeight;
-
-    const renderPin = (avatar, initial, zIndex, extraStyle = '') => (
-      <div
-        className={`absolute flex flex-col items-center ${extraStyle}`}
-        style={{ left: `${sameWeight ? myLeftPct : (avatar === friendAvatar ? friendLeftPct : myLeftPct)}%`, zIndex, transform: 'translateX(-50%)' }}
-      >
-        <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-white bg-slate-600 flex items-center justify-center text-white text-xs font-bold">
-          {avatar ? <img src={avatar} alt="" className="w-full h-full object-cover" /> : initial}
-        </div>
-        <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-white" />
-      </div>
-    );
 
     return (
-      <div className="flex flex-col gap-1 w-40">
+      <div className="flex flex-col w-56 mt-1">
         {/* Pins row */}
-        <div className="relative h-8">
-          {/* My pin */}
-          {renderPin(null, 'M', sameWeight ? 10 : 20, sameWeight ? 'mt-1' : '')}
-          {/* Friend pin - on top when same weight */}
-          {(() => {
-            const style = `absolute flex flex-col items-center${sameWeight ? ' -mt-0' : ''}`;
-            return (
-              <div
-                className={style}
-                style={{ left: `${friendLeftPct}%`, zIndex: 30, transform: 'translateX(-50%)' }}
-              >
-                <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-blue-400 bg-slate-600 flex items-center justify-center text-white text-xs font-bold">
-                  {friendAvatar ? <img src={friendAvatar} alt="" className="w-full h-full object-cover" /> : friendInitial}
-                </div>
-                <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-400" />
-              </div>
-            );
-          })()}
+        <div className="relative h-12">
+          {/* My pin - white border, offset down when same weight */}
+          <div
+            className="absolute flex flex-col items-center"
+            style={{ left: `${myLeftPct}%`, transform: 'translateX(-50%)', zIndex: 20, top: sameWeight ? '10px' : '0px' }}
+          >
+            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white bg-slate-500 flex items-center justify-center text-white text-xs font-bold shadow-lg">
+              {profile?.avatar_url
+                ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                : <span>{profile?.username?.charAt(0).toUpperCase() || 'Me'}</span>
+              }
+            </div>
+            <div className="w-0 h-0 border-l-[5px] border-r-[5px] border-t-[6px] border-l-transparent border-r-transparent border-t-white" />
+          </div>
+
+          {/* Friend pin - blue border, always on top */}
+          <div
+            className="absolute flex flex-col items-center"
+            style={{ left: `${friendLeftPct}%`, transform: 'translateX(-50%)', zIndex: 30, top: '0px' }}
+          >
+            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-400 bg-slate-500 flex items-center justify-center text-white text-xs font-bold shadow-lg">
+              {friendAvatar
+                ? <img src={friendAvatar} alt="" className="w-full h-full object-cover" />
+                : <span>{friendInitial}</span>
+              }
+            </div>
+            <div className="w-0 h-0 border-l-[5px] border-r-[5px] border-t-[6px] border-l-transparent border-r-transparent border-t-blue-400" />
+          </div>
         </div>
 
         {/* Color bar */}
-        <div className="relative h-4 rounded overflow-hidden flex">
+        <div className="relative h-5 rounded overflow-hidden flex">
           <div className="bg-red-500" style={{ width: '30%' }} />
           <div className="bg-yellow-500" style={{ width: '40%' }} />
           <div className="bg-green-500" style={{ width: '30%' }} />
         </div>
 
-        {/* Weight numbers row */}
-        <div className="relative h-4">
+        {/* Weight numbers */}
+        <div className="relative h-5">
           <span
             className="absolute text-xs text-white font-medium"
-            style={{ left: `${myLeftPct}%`, transform: 'translateX(-50%)' }}
+            style={{ left: `${myLeftPct}%`, transform: 'translateX(-50%)', top: '2px' }}
           >
             {myWeight}
           </span>
           {!sameWeight && (
             <span
               className="absolute text-xs text-blue-300 font-medium"
-              style={{ left: `${friendLeftPct}%`, transform: 'translateX(-50%)' }}
+              style={{ left: `${friendLeftPct}%`, transform: 'translateX(-50%)', top: '2px' }}
             >
               {friendWeight}
-            </span>
-          )}
-          {sameWeight && (
-            <span
-              className="absolute text-xs text-slate-300 font-medium"
-              style={{ left: `${myLeftPct}%`, transform: 'translateX(-50%)' }}
-            >
-              {myWeight}
             </span>
           )}
         </div>

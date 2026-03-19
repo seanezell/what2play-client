@@ -91,7 +91,6 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (file.type !== 'image/png') {
       alert('Only PNG files are allowed');
       e.target.value = '';
@@ -100,29 +99,29 @@ export default function UserProfile({ profile, onClose, onProfileUpdated, requir
 
     try {
       setUploading(true);
-      
-      // Get presigned URL
-      const response = await apiCall(ENDPOINTS.UPLOAD_AVATAR, {
+
+      // Step 1: Get presigned URL (no body required)
+      const { upload_url, avatar_url } = await apiCall(ENDPOINTS.UPLOAD_AVATAR, {
         method: 'POST',
-        body: JSON.stringify({ filename: 'avatar.png' }),
       });
 
-      const { upload_url, avatar_url } = response;
-
-      // Upload to S3 using PUT
-      await fetch(upload_url, {
+      // Step 2: Upload directly to S3
+      const uploadRes = await fetch(upload_url, {
         method: 'PUT',
         body: file,
-        headers: {
-          'Content-Type': 'image/png',
-        },
+        headers: { 'Content-Type': 'image/png' },
       });
 
-      // Update form data with avatar URL
-      setFormData(prev => ({
-        ...prev,
-        avatar_url: avatar_url,
-      }));
+      if (!uploadRes.ok) throw new Error('Upload failed');
+
+      // Step 3: Save avatar_url to profile immediately
+      await apiCall(ENDPOINTS.UPDATE_PROFILE, {
+        method: 'PUT',
+        body: JSON.stringify({ avatar_url }),
+      });
+
+      setFormData(prev => ({ ...prev, avatar_url }));
+      onProfileUpdated({ ...profile, avatar_url });
     } catch (error) {
       console.error('Failed to upload avatar:', error);
       alert('Failed to upload avatar');

@@ -87,7 +87,7 @@ export default function GamesList({ profile }) {
     const friendLeftPct = ((friendWeight - 1) / 9) * 100;
 
     return (
-      <div className="flex flex-col w-56 mt-1">
+      <div className="flex flex-col w-56 -mt-8">
         {/* Pins row */}
         <div className="relative h-12">
           {/* My pin - white border, offset down when same weight */}

@@ -97,7 +97,7 @@ function App() {
             </div>
           )}
           {activeTab === 'friends' && <FriendsList />}
-          {activeTab === 'groups' && <GroupsList />}
+          {activeTab === 'groups' && <GroupsList profile={profile} />}
         </main>
 
         {showProfileModal && (

@@ -4,7 +4,7 @@ import { ENDPOINTS } from '../constants';
 import CreateGroup from './CreateGroup';
 import GroupDetail from './GroupDetail';
 
-export default function GroupsList() {
+export default function GroupsList({ profile }) {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,6 +72,7 @@ export default function GroupsList() {
       {selectedGroup && (
         <GroupDetail
           group={selectedGroup}
+          profile={profile}
           onClose={() => setSelectedGroup(null)}
           onGroupUpdated={() => { loadGroups(); }}
           onGroupDeleted={() => { setSelectedGroup(null); loadGroups(); }}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiCall } from '../api';
 import { ENDPOINTS } from '../constants';
+import { getCurrentUserId } from '../auth';
 
 const weightColor = (w) => w <= 3 ? 'text-red-400' : w <= 7 ? 'text-yellow-400' : 'text-green-400';
 const weightBg = (w) => w <= 3 ? 'bg-red-900/40' : w <= 7 ? 'bg-yellow-900/40' : 'bg-green-900/40';
@@ -16,7 +17,8 @@ function Avatar({ member, size = 'sm' }) {
   );
 }
 
-export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDeleted }) {
+export default function GroupDetail({ group, profile, onClose, onGroupUpdated, onGroupDeleted }) {
+  const currentUserId = getCurrentUserId();
   const [members, setMembers] = useState(group.members || []);
   const [groupName, setGroupName] = useState(group.group_name || '');
   const [pickableGames, setPickableGames] = useState([]);
@@ -36,15 +38,21 @@ export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDel
     try {
       setLoading(true);
       const [gameResults, friendsResult] = await Promise.all([
-        Promise.all(currentMembers.map(m => apiCall(`${ENDPOINTS.LIST_FRIENDS_GAMES}?user_id=${m.user_id}`))),
+        Promise.all(currentMembers.map(m =>
+          m.user_id === currentUserId
+            ? apiCall(ENDPOINTS.LIST_GAMES)
+            : apiCall(`${ENDPOINTS.LIST_FRIENDS_GAMES}?user_id=${m.user_id}`)
+        )),
         apiCall(ENDPOINTS.LIST_FRIENDS),
       ]);
 
       setFriends(friendsResult.friends || []);
 
-      // Enrich members with avatar_url from friends list
       const friendMap = Object.fromEntries((friendsResult.friends || []).map(f => [f.user_id, f]));
-      setMembers(currentMembers.map(m => ({ ...m, avatar_url: friendMap[m.user_id]?.avatar_url || null })));
+      setMembers(currentMembers.map(m => ({
+        ...m,
+        avatar_url: m.user_id === currentUserId ? (profile?.avatar_url || null) : (friendMap[m.user_id]?.avatar_url || null),
+      })));
 
       const memberGameMaps = gameResults.map(r =>
         Object.fromEntries((r.games || []).map(g => [g.game_id.toLowerCase(), g]))
@@ -272,7 +280,7 @@ export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDel
                   <span className="text-white text-sm">{m.username}</span>
                   {m.user_id === group.owner_id && <span className="text-xs text-slate-400">(owner)</span>}
                 </div>
-                {m.user_id !== group.owner_id && (
+                {m.user_id !== currentUserId && m.user_id !== group.owner_id && (
                   <button
                     onClick={() => handleRemoveMember(m.user_id)}
                     disabled={saving}

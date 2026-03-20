@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiCall } from '../api';
 import { ENDPOINTS } from '../constants';
+import { getCurrentUserId } from '../auth';
 
 const weightColor = (w) => w <= 3 ? 'text-red-400' : w <= 7 ? 'text-yellow-400' : 'text-green-400';
 const weightBg = (w) => w <= 3 ? 'bg-red-900/40' : w <= 7 ? 'bg-yellow-900/40' : 'bg-green-900/40';
@@ -16,7 +17,8 @@ function Avatar({ member, size = 'sm' }) {
   );
 }
 
-export default function GroupDetail({ group, currentUserId, onClose, onGroupUpdated, onGroupDeleted }) {
+export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDeleted }) {
+  const currentUserId = getCurrentUserId();
   const [members, setMembers] = useState(group.members || []);
   const [groupName, setGroupName] = useState(group.group_name || '');
   const [pickableGames, setPickableGames] = useState([]);
@@ -37,9 +39,13 @@ export default function GroupDetail({ group, currentUserId, onClose, onGroupUpda
   const loadData = async () => {
     try {
       setLoading(true);
-      // Fetch all member games in parallel
+      // Fetch all member games in parallel — use LIST_GAMES for self, LIST_FRIENDS_GAMES for others
       const gameResults = await Promise.all(
-        members.map(m => apiCall(`${ENDPOINTS.LIST_FRIENDS_GAMES}?user_id=${m.user_id}`))
+        members.map(m =>
+          m.user_id === currentUserId
+            ? apiCall(ENDPOINTS.LIST_GAMES)
+            : apiCall(`${ENDPOINTS.LIST_FRIENDS_GAMES}?user_id=${m.user_id}`)
+        )
       );
 
       // Also load friends list for the add-member dropdown (owner only)

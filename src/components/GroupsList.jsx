@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiCall } from '../api';
 import { ENDPOINTS } from '../constants';
-import { getCurrentUserId } from '../auth';
 import CreateGroup from './CreateGroup';
 import GroupDetail from './GroupDetail';
 
@@ -10,7 +9,6 @@ export default function GroupsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
-  const currentUserId = getCurrentUserId();
 
   useEffect(() => {
     loadGroups();
@@ -74,7 +72,6 @@ export default function GroupsList() {
       {selectedGroup && (
         <GroupDetail
           group={selectedGroup}
-          currentUserId={currentUserId}
           onClose={() => setSelectedGroup(null)}
           onGroupUpdated={() => { loadGroups(); }}
           onGroupDeleted={() => { setSelectedGroup(null); loadGroups(); }}

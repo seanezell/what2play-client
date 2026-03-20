@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiCall } from '../api';
 import { ENDPOINTS } from '../constants';
-import { getCurrentUserId } from '../auth';
 
 const weightColor = (w) => w <= 3 ? 'text-red-400' : w <= 7 ? 'text-yellow-400' : 'text-green-400';
 const weightBg = (w) => w <= 3 ? 'bg-red-900/40' : w <= 7 ? 'bg-yellow-900/40' : 'bg-green-900/40';
@@ -18,7 +17,6 @@ function Avatar({ member, size = 'sm' }) {
 }
 
 export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDeleted }) {
-  const currentUserId = getCurrentUserId();
   const [members, setMembers] = useState(group.members || []);
   const [groupName, setGroupName] = useState(group.group_name || '');
   const [pickableGames, setPickableGames] = useState([]);
@@ -30,53 +28,43 @@ export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDel
   const [sortDir, setSortDir] = useState('desc');
   const [editingName, setEditingName] = useState(false);
 
-  const isOwner = group.owner_id === currentUserId;
-
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (currentMembers = members) => {
     try {
       setLoading(true);
-      // Fetch all member games in parallel — use LIST_GAMES for self, LIST_FRIENDS_GAMES for others
-      const gameResults = await Promise.all(
-        members.map(m =>
-          m.user_id === currentUserId
-            ? apiCall(ENDPOINTS.LIST_GAMES)
-            : apiCall(`${ENDPOINTS.LIST_FRIENDS_GAMES}?user_id=${m.user_id}`)
-        )
-      );
+      const [gameResults, friendsResult] = await Promise.all([
+        Promise.all(currentMembers.map(m => apiCall(`${ENDPOINTS.LIST_FRIENDS_GAMES}?user_id=${m.user_id}`))),
+        apiCall(ENDPOINTS.LIST_FRIENDS),
+      ]);
 
-      // Also load friends list for the add-member dropdown (owner only)
-      if (isOwner) {
-        const friendsResult = await apiCall(ENDPOINTS.LIST_FRIENDS);
-        setFriends(friendsResult.friends || []);
-      }
+      setFriends(friendsResult.friends || []);
 
-      // Build map: member index -> their games map (game_id -> game)
+      // Enrich members with avatar_url from friends list
+      const friendMap = Object.fromEntries((friendsResult.friends || []).map(f => [f.user_id, f]));
+      setMembers(currentMembers.map(m => ({ ...m, avatar_url: friendMap[m.user_id]?.avatar_url || null })));
+
       const memberGameMaps = gameResults.map(r =>
         Object.fromEntries((r.games || []).map(g => [g.game_id.toLowerCase(), g]))
       );
 
-      // Intersection: games that every member has
       if (memberGameMaps.length === 0) { setPickableGames([]); return; }
 
       const [first, ...rest] = memberGameMaps;
       const intersection = Object.keys(first).filter(id => rest.every(m => id in m));
 
-      const games = intersection.map(gameId => {
+      setPickableGames(intersection.map(gameId => {
         const weights = memberGameMaps.map(m => m[gameId]?.weight ?? 5);
         const avg = weights.reduce((a, b) => a + b, 0) / weights.length;
         return {
           game_id: gameId,
           name: first[gameId]?.name || gameId,
-          weights, // index-aligned with members array
+          weights,
           avg: Math.round(avg * 10) / 10,
         };
-      });
-
-      setPickableGames(games);
+      }));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -95,15 +83,9 @@ export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDel
 
   const sortedGames = [...pickableGames].sort((a, b) => {
     let aVal, bVal;
-    if (sortCol === 'avg') {
-      aVal = a.avg; bVal = b.avg;
-    } else if (sortCol === 'name') {
-      aVal = a.name.toLowerCase(); bVal = b.name.toLowerCase();
-    } else {
-      // member index
-      aVal = a.weights[sortCol] ?? 0;
-      bVal = b.weights[sortCol] ?? 0;
-    }
+    if (sortCol === 'avg') { aVal = a.avg; bVal = b.avg; }
+    else if (sortCol === 'name') { aVal = a.name.toLowerCase(); bVal = b.name.toLowerCase(); }
+    else { aVal = a.weights[sortCol] ?? 0; bVal = b.weights[sortCol] ?? 0; }
     if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
     if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
     return 0;
@@ -138,8 +120,7 @@ export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDel
       });
       setMembers(updated);
       onGroupUpdated();
-      // Reload games since pool may have changed
-      await loadData();
+      await loadData(updated);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -157,7 +138,7 @@ export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDel
       });
       setMembers(updated);
       onGroupUpdated();
-      await loadData();
+      await loadData(updated);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -201,9 +182,7 @@ export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDel
             ) : (
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-white">{groupName || 'Unnamed Group'}</h2>
-                {isOwner && (
-                  <button onClick={() => setEditingName(true)} className="text-slate-400 hover:text-white text-sm">✏️</button>
-                )}
+                <button onClick={() => setEditingName(true)} className="text-slate-400 hover:text-white text-sm">✏️</button>
               </div>
             )}
             <p className="text-slate-400 text-sm mt-1">{members.length} members · {pickableGames.length} games in common</p>
@@ -281,61 +260,54 @@ export default function GroupDetail({ group, onClose, onGroupUpdated, onGroupDel
           )}
         </div>
 
-        {/* Owner Management */}
-        {isOwner && (
-          <div className="px-6 pb-6 border-t border-slate-700 pt-4 space-y-4">
-            <h3 className="text-white font-medium">Manage Members</h3>
+        {/* Management */}
+        <div className="px-6 pb-6 border-t border-slate-700 pt-4 space-y-4">
+          <h3 className="text-white font-medium">Manage Members</h3>
 
-            <div className="space-y-2">
-              {members.map(m => (
-                <div key={m.user_id} className="flex items-center justify-between bg-slate-700/50 px-3 py-2 rounded">
-                  <div className="flex items-center gap-2">
-                    <Avatar member={m} size="sm" />
-                    <span className="text-white text-sm">{m.username}</span>
-                    {m.user_id === group.owner_id && <span className="text-xs text-slate-400">(owner)</span>}
-                  </div>
-                  {m.user_id !== group.owner_id && (
-                    <button
-                      onClick={() => handleRemoveMember(m.user_id)}
-                      disabled={saving}
-                      className="text-xs px-2 py-1 bg-red-700 text-white rounded hover:bg-red-600 disabled:opacity-50"
-                    >
-                      Remove
-                    </button>
-                  )}
+          <div className="space-y-2">
+            {members.map(m => (
+              <div key={m.user_id} className="flex items-center justify-between bg-slate-700/50 px-3 py-2 rounded">
+                <div className="flex items-center gap-2">
+                  <Avatar member={m} size="sm" />
+                  <span className="text-white text-sm">{m.username}</span>
+                  {m.user_id === group.owner_id && <span className="text-xs text-slate-400">(owner)</span>}
                 </div>
-              ))}
-            </div>
-
-            {friendsNotInGroup.length > 0 && (
-              <div className="flex items-center gap-2">
-                <select
-                  id="addMemberSelect"
-                  className="flex-1 px-3 py-2 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:border-blue-500 text-sm"
-                  defaultValue=""
-                  onChange={e => {
-                    const friend = friends.find(f => f.user_id === e.target.value);
-                    if (friend) { handleAddMember(friend); e.target.value = ''; }
-                  }}
-                >
-                  <option value="" disabled>Add a friend...</option>
-                  {friendsNotInGroup.map(f => (
-                    <option key={f.user_id} value={f.user_id}>{f.username}</option>
-                  ))}
-                </select>
+                {m.user_id !== group.owner_id && (
+                  <button
+                    onClick={() => handleRemoveMember(m.user_id)}
+                    disabled={saving}
+                    className="text-xs px-2 py-1 bg-red-700 text-white rounded hover:bg-red-600 disabled:opacity-50"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
-            )}
-
-            <div className="pt-2">
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-700 text-white rounded text-sm hover:bg-red-600"
-              >
-                Delete Group
-              </button>
-            </div>
+            ))}
           </div>
-        )}
+
+          {friendsNotInGroup.length > 0 && (
+            <select
+              className="w-full px-3 py-2 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:border-blue-500 text-sm"
+              value=""
+              onChange={e => {
+                const friend = friends.find(f => f.user_id === e.target.value);
+                if (friend) handleAddMember(friend);
+              }}
+            >
+              <option value="" disabled>Add a friend...</option>
+              {friendsNotInGroup.map(f => (
+                <option key={f.user_id} value={f.user_id}>{f.username}</option>
+              ))}
+            </select>
+          )}
+
+          <button
+            onClick={handleDelete}
+            className="px-4 py-2 bg-red-700 text-white rounded text-sm hover:bg-red-600"
+          >
+            Delete Group
+          </button>
+        </div>
       </div>
     </div>
   );

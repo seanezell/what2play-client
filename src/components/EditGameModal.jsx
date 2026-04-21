@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Modal from './Modal';
 import { apiCall } from '../api';
 import { ENDPOINTS, PLATFORMS } from '../constants';
 
@@ -27,7 +28,7 @@ export default function EditGameModal({ game, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <Modal>
       <div className="bg-slate-800 p-6 rounded-lg w-96 max-w-full mx-4">
         <h3 className="text-xl font-bold text-white mb-2">Edit Game</h3>
         <p className="text-sm text-slate-400 italic mb-4">Added games are eligible for picks — use visibility to control sharing.</p>
@@ -94,6 +95,6 @@ export default function EditGameModal({ game, onClose, onSave }) {
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

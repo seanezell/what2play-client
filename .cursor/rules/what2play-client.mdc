@@ -1,0 +1,12 @@
+---
+description: Conventions for the what2play-client React + Vite app
+globs: src/**/*.{js,jsx}
+---
+
+# What 2 Play client
+
+- **HTTP:** Use `apiCall` from `src/api.js` with paths from `ENDPOINTS` in `src/constants.js`. Do not add raw `fetch` to the REST API except for Cognito token exchange (`auth.js`) and S3 presigned PUT uploads (`UserProfile` avatar flow).
+- **Env:** Only `import.meta.env.VITE_*` for client configuration. New variables must be documented in the root `README.md`.
+- **Structure:** Prefer small shared pieces (`src/utils/`, `src/hooks/`, `src/components/`) over duplicating modal shells, JWT parsing, or list-fetch patterns.
+- **Testing:** Vitest + Testing Library. Unit-test pure helpers (`src/utils/`) and mock `fetch` / `vi.mock` auth when testing `apiCall`.
+- **UI:** Tailwind utility classes consistent with existing slate/blue dashboard styling; keep modals using the shared `Modal` component when adding overlays.

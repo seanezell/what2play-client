@@ -1,32 +1,8 @@
-import { useState, useEffect } from 'react';
-import { apiCall } from '../api';
-import { ENDPOINTS } from '../constants';
+import { useTopLists } from '../hooks/useTopLists';
+import TopListsSection from './TopListsSection';
 
 export default function RecentGamesPicked({ limit = 5 }) {
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchRecentGames = async () => {
-      try {
-        setLoading(true);
-        const response = await apiCall(`${ENDPOINTS.TOP_LISTS}?type=recent&limit=${limit}`, {
-          method: 'GET',
-        });
-        setGames(response.items || []);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to fetch recent games:', err);
-        setError('Failed to load recent games');
-        setGames([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRecentGames();
-  }, [limit]);
+  const { games, loading, error } = useTopLists('recent', limit, 'Failed to load recent games');
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -34,41 +10,19 @@ export default function RecentGamesPicked({ limit = 5 }) {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    // Check if date is today
     if (date.toDateString() === today.toDateString()) {
       return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Check if date is yesterday
     if (date.toDateString() === yesterday.toDateString()) {
       return 'Yesterday';
     }
 
-    // Otherwise show date
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  if (loading) {
-    return (
-      <div className="bg-slate-800 p-6 rounded-lg">
-        <h3 className="text-xl font-bold text-white mb-4">⏱️ Recently Picked</h3>
-        <div className="text-slate-400 text-center py-4">Loading...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-slate-800 p-6 rounded-lg">
-        <h3 className="text-xl font-bold text-white mb-4">⏱️ Recently Picked</h3>
-        <div className="text-red-400 text-center py-4">{error}</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-slate-800 p-6 rounded-lg">
-      <h3 className="text-xl font-bold text-white mb-4">⏱️ Recently Picked</h3>
+    <TopListsSection title="⏱️ Recently Picked" loading={loading} error={error}>
       {games.length === 0 ? (
         <div className="text-slate-400 text-center py-4">No recent picks</div>
       ) : (
@@ -89,6 +43,6 @@ export default function RecentGamesPicked({ limit = 5 }) {
           ))}
         </div>
       )}
-    </div>
+    </TopListsSection>
   );
 }

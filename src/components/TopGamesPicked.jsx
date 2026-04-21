@@ -1,54 +1,11 @@
-import { useState, useEffect } from 'react';
-import { apiCall } from '../api';
-import { ENDPOINTS } from '../constants';
+import { useTopLists } from '../hooks/useTopLists';
+import TopListsSection from './TopListsSection';
 
 export default function TopGamesPicked({ limit = 5 }) {
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchTopGames = async () => {
-      try {
-        setLoading(true);
-        const response = await apiCall(`${ENDPOINTS.TOP_LISTS}?type=top&limit=${limit}`, {
-          method: 'GET',
-        });
-        setGames(response.items || []);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to fetch top games:', err);
-        setError('Failed to load top games');
-        setGames([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTopGames();
-  }, [limit]);
-
-  if (loading) {
-    return (
-      <div className="bg-slate-800 p-6 rounded-lg">
-        <h3 className="text-xl font-bold text-white mb-4">🏆 Top Games Picked</h3>
-        <div className="text-slate-400 text-center py-4">Loading...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-slate-800 p-6 rounded-lg">
-        <h3 className="text-xl font-bold text-white mb-4">🏆 Top Games Picked</h3>
-        <div className="text-red-400 text-center py-4">{error}</div>
-      </div>
-    );
-  }
+  const { games, loading, error } = useTopLists('top', limit, 'Failed to load top games');
 
   return (
-    <div className="bg-slate-800 p-6 rounded-lg">
-      <h3 className="text-xl font-bold text-white mb-4">🏆 Top Games Picked</h3>
+    <TopListsSection title="🏆 Top Games Picked" loading={loading} error={error}>
       {games.length === 0 ? (
         <div className="text-slate-400 text-center py-4">No games yet</div>
       ) : (
@@ -64,6 +21,6 @@ export default function TopGamesPicked({ limit = 5 }) {
           ))}
         </div>
       )}
-    </div>
+    </TopListsSection>
   );
 }

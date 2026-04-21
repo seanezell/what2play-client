@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Modal from './Modal';
 import { apiCall } from '../api';
 import { ENDPOINTS } from '../constants';
 import { getCurrentUserId } from '../auth';
@@ -167,7 +168,7 @@ export default function GroupDetail({ group, profile, onClose, onGroupUpdated, o
   const friendsNotInGroup = friends.filter(f => !members.some(m => m.user_id === f.user_id));
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
+    <Modal align="start">
       <div className="bg-slate-800 rounded-lg w-full max-w-4xl my-8">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
@@ -317,6 +318,6 @@ export default function GroupDetail({ group, profile, onClose, onGroupUpdated, o
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

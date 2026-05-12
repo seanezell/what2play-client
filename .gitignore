@@ -1,5 +1,5 @@
 *.code-workspace
-working-instructions/
+tooling/
 
 # Dependencies
 node_modules/
